@@ -40,7 +40,7 @@ class Covid19PortugalDailyUpdate extends Command
         $daily->date = $content['data'];
         $daily->record_date = $content['data_dados'];
         $daily->json_raw = $content;
-        $daily->save();
+        $result = $daily->save();
 
         $previousDateObj = $lastUpdateDateObj->subDay();
         $previousReportDaily = RptDaily::where('date', $previousDateObj->format('Y-m-d'))->first();
@@ -50,8 +50,10 @@ class Covid19PortugalDailyUpdate extends Command
         $deathsVariation = $deathsVariationBalance > 0 ? '+' : '-';
         $content['obitos_balanco_diario'] = sprintf("%s%d", $deathsVariation, $deathsVariationBalance);
 
-        Notification::route('telegram', config('services.telegram-bot-api.chat_id'))
-            ->notify(new Covid19ReportDaily($content));
+        if($result){
+            Notification::route('telegram', config('services.telegram-bot-api.chat_id'))
+                ->notify(new Covid19ReportDaily($content));
+        }
 
         return 0;
     }

@@ -15,7 +15,7 @@ class RptCounty extends Model
      *
      * @var array
      */
-    protected $fillable = ['*'];
+    protected $fillable = ['date','name','district','json_raw'];
 
     /**
      * The attributes that should be hidden for arrays.
