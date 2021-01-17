@@ -25,6 +25,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('covid19pt:daily-update')->everyFiveMinutes();
+        $schedule->command('covid19pt:county-update')->everyFiveMinutes();
     }
 
     /**
@@ -36,7 +37,7 @@ class Kernel extends ConsoleKernel
     {
         $this->load([
             __DIR__.'/Commands/Covid19PT',
-            __DIR__.'/Commands/Weather'
+            //__DIR__.'/Commands/Weather'
         ]);
 
         require base_path('routes/console.php');
