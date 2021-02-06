@@ -3,39 +3,26 @@
 </p>
 
 
-# Suricata News
+# Suricata News BOT
 
 This project was created to be a news/data aggregator and/or notifier. 
 There are available commands to grab data store/cache it and trigger notifications. Probably in a near future i will create api endpoints to provide the data to other tools or apps.
 
+### Features
+
 Commands available:
 - CLI scripts fetch or scrap data
     - Covid19 Portugal
+        - [x] Fetch daily numbers
+        - [x] Fetch daily county numbers
+        - [x] Full database update
     - Weather IPMA warnings
+        - [x] Fetch IPMA warnings
 
 Notification channels:
 - Telegram notifications
   - Channel SuricataNews https://t.me/SuricataNews
-
-### Features 
-
-#### Covid19 data (Portugal)
-
-- [x] Fetch daily numbers
-- [x] Fetch daily county numbers
-- [x] Full database update
-
-Data sources (VOSTPT and DSSG):
-- https://covid19-api.vost.pt/
-- https://github.com/dssg-pt/covid19pt-data
-
-#### Weather
-
-- Features
-    - [x] Fetch IPMA warnings
-
-- Data source IPMA
-    - https://www.ipma.pt
+    
 
 ### Requirements
 
@@ -79,3 +66,12 @@ php artisan covid19pt:full-update-counties
   
  weather:ipma:fetch-warnings
 ```
+
+#### Data sources
+
+Covid19 data Portugal (VOSTPT and DSSG):
+- https://covid19-api.vost.pt/
+- https://github.com/dssg-pt/covid19pt-data
+
+IPMA:
+- https://api.ipma.pt
