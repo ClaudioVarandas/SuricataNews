@@ -33,11 +33,18 @@ return [
         'base_url' => 'https://covid19-api.vost.pt/Requests'
     ],
     'dssg_pt_covid19' => [
-        'full_counties' => 'https://github.com/dssg-pt/covid19pt-data/blob/master/data_concelhos_new.csv',
-        'full_daily' =>  'https://raw.githubusercontent.com/dssg-pt/covid19pt-data/master/data.csv'
+        'full_counties' => 'https://raw.githubusercontent.com/dssg-pt/covid19pt-data/master/data_concelhos_new.csv',
+        'full_daily' => 'https://raw.githubusercontent.com/dssg-pt/covid19pt-data/master/data.csv'
+    ],
+    'ipma' => [
+        'api_base_url' => env('IPMA_API_BASE_URL')
     ],
     'telegram-bot-api' => [
         'token' => env('TELEGRAM_BOT_TOKEN'),
         'chat_id' => env('TELEGRAM_CHAT_ID')
+    ],
+    'telegram-bot-api-tests' => [
+        'token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID_TESTS')
     ],
 ];

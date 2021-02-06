@@ -17,5 +17,12 @@ services:
     ports:
       - ${DB_PORT:-3306}:3306
 
+  redis:
+    image: redis:6
+    container_name: suri_redis
+    restart: always
+    ports:
+      - 6380:6379
+
 volumes:
   mariadb_volume:

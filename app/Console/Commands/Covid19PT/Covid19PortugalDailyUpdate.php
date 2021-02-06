@@ -33,6 +33,7 @@ class Covid19PortugalDailyUpdate extends Command
         $reportDaily = RptDaily::where('date', $lastUpdateDateObj->format('Y-m-d'))->first();
 
         if ($reportDaily) {
+            $this->info("Sem novos dados para actualizar.");
             return 0;
         }
 
@@ -44,10 +45,16 @@ class Covid19PortugalDailyUpdate extends Command
 
         $previousDateObj = $lastUpdateDateObj->subDay();
         $previousReportDaily = RptDaily::where('date', $previousDateObj->format('Y-m-d'))->first();
-        $previousReportDailyData = $previousReportDaily->json_raw;
 
-        $deathsVariationBalance = $content['obitos'] - $previousReportDailyData['obitos'];
-        $deathsVariation = $deathsVariationBalance > 0 ? '+' : '-';
+        $deathsVariation = '';
+        $deathsVariationBalance = 0;
+
+        if(!empty($previousReportDaily)){
+            $previousReportDailyData = $previousReportDaily->json_raw;
+            $deathsVariationBalance = $content['obitos'] - $previousReportDailyData['obitos'];
+            $deathsVariation = $deathsVariationBalance > 0 ? '+' : '-';
+        }
+
         $content['obitos_balanco_diario'] = sprintf("%s%d", $deathsVariation, $deathsVariationBalance);
 
         if($result){

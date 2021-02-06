@@ -3,52 +3,39 @@
 </p>
 
 
-# Suricata News Notifier
+# Suricata News
 
-This project was created to be a new/informations aggregator and notifier, and is based in two main components :
+This project was created to be a news/data aggregator and/or notifier. 
+There are available commands to grab data store/cache it and trigger notifications. Probably in a near future i will create api endpoints to provide the data to other tools or apps.
 
-- Commands
-    - CLI scripts used to fetch or scrap data
-        - Covid19 Portugal
-        - Weather
-        - News
+Commands available:
+- CLI scripts fetch or scrap data
+    - Covid19 Portugal
+    - Weather IPMA warnings
 
-- Notifications
-    - Social Bot's
-        - Telegram notifications
-            - [x] Channel SuricataNews https://t.me/SuricataNews
+Notification channels:
+- Telegram notifications
+  - Channel SuricataNews https://t.me/SuricataNews
 
-### Roadmap
+### Features 
 
-##### Covid19 Portugal data (DONE)
+#### Covid19 data (Portugal)
 
-- Features
-    - [x] Full database update
-    - [x] Get daily numbers
-    - [x] Get daily county numbers
+- [x] Fetch daily numbers
+- [x] Fetch daily county numbers
+- [x] Full database update
 
-- Data sources (VOSTPT and DSSG)
-    - https://covid19-api.vost.pt/
-    - https://github.com/dssg-pt/covid19pt-data
+Data sources (VOSTPT and DSSG):
+- https://covid19-api.vost.pt/
+- https://github.com/dssg-pt/covid19pt-data
 
-##### Weather (WIP)
+#### Weather
 
 - Features
-    - [x] Current conditions
-    - [x] Daily forecasts (next 5 days)
-    - [x] Severe weather (alerts)
+    - [x] Fetch IPMA warnings
 
-- Data source
-    - https://www.weatherbit.io/api
-
-##### News (TODO)
-
-- Features
-    - [] Recent news
-
-- Data source
-    - ???
-
+- Data source IPMA
+    - https://www.ipma.pt
 
 ### Requirements
 
@@ -56,6 +43,7 @@ This project was created to be a new/informations aggregator and notifier, and i
 - PHP >=7.3
 - Docker backend:
     - Mariadb 10.5
+    - Redis 6
 
 Start docker in the root of the project:
 
@@ -79,4 +67,15 @@ docker-compose up -d
 ```
 php artisan covid19pt:full-update-daily
 php artisan covid19pt:full-update-counties
+```
+
+### Commands available
+
+```sh
+ covid19pt:county-update         
+ covid19pt:daily-update          
+ covid19pt:full-update-counties  
+ covid19pt:full-update-daily 
+  
+ weather:ipma:fetch-warnings
 ```
