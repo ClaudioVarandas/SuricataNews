@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands\Weather\Ipma;
 
-use App\Notifications\Covid19ReportDaily;
 use App\Notifications\IpmaWarnings;
 use GuzzleHttp\Client;
 use GuzzleHttp\Client as HttpClient;
@@ -30,7 +29,7 @@ class IpmaFetchWarnings extends Command
     private const ALLOWED_AWARENESS_LEVELS = [
         self::AWARENESS_LEVEL_YELLOW => 'Amarelo',
         self::AWARENESS_LEVEL_ORANGE => 'Laranja',
-        self::AWARENESS_LEVEL_RED => 'red',
+        self::AWARENESS_LEVEL_RED => 'Vermelho',
     ];
 
     private const AWARENESS_LEVELS_LABELS = [
@@ -116,8 +115,7 @@ class IpmaFetchWarnings extends Command
         $notificationData = [];
 
         foreach ($warningsData->toArray() as $warning) {
-            $notificationData[] = [
-                'county' => $warning['county'],
+            $notificationData[$warning['county']][] = [
                 'type_level' => self::ALLOWED_AWARENESS_LEVELS[$warning['type_level']],
                 'type_name' => $warning['type_name'],
                 'text' => $warning['text'],
@@ -126,8 +124,10 @@ class IpmaFetchWarnings extends Command
         }
 
         if (!empty($notificationData)) {
-            Notification::route('telegram', config('services.telegram-bot-api.chat_id'))
-                ->notify(new IpmaWarnings($notificationData));
+            foreach (['Lisboa', 'Setubal'] as $county) {
+                Notification::route('telegram', config('services.telegram-bot-api.chat_id'))
+                    ->notify(new IpmaWarnings($county, $notificationData[$county]));
+            }
         }
     }
 

@@ -24,8 +24,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        // Covid19 PT
         $schedule->command('covid19pt:daily-update')->everyFiveMinutes();
         $schedule->command('covid19pt:county-update')->everyFiveMinutes();
+        // Weather
+        $schedule->command('weather:ipma:fetch-warnings')->dailyAt('08:30');
     }
 
     /**

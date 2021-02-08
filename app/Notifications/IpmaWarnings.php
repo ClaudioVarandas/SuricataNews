@@ -15,14 +15,17 @@ class IpmaWarnings extends Notification
 
     protected array $data;
 
+    protected string $county;
+
     /**
      * Create a new notification instance.
      *
      * @param array $data
      */
-    public function __construct(array $data)
+    public function __construct(string $county, array $data)
     {
         $this->data = $data;
+        $this->county = $county;
     }
 
     /**
@@ -47,13 +50,11 @@ class IpmaWarnings extends Notification
 
     protected function buildPayload(array $data)
     {
-        $text = sprintf("*** IPMA | %d avisos meteorológicos em vigor ***",count($data));
+        $text = sprintf("*** %s | IPMA %d avisos meteorológicos em vigor ***", $this->county, count($data));
 
-        foreach ($data as $item){
+        foreach ($data as $item) {
 
             $text .= PHP_EOL;
-            $text .= PHP_EOL;
-            $text .= sprintf("_%s_", strtoupper($item['county']));
             $text .= PHP_EOL;
             $text .= sprintf("Aviso *%s* até %s ", strtoupper($item['type_level']), $item['end_time']);
             $text .= PHP_EOL;
