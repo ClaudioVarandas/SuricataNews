@@ -1,6 +1,23 @@
 version: "3.6"
 
 services:
+  api:
+    container_name: suri_api
+    build:
+      context: ./docker/php80
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP}'
+    ports:
+      - '${APP_PORT:-88}:80'
+    environment:
+      WWWUSER: '${WWWUSER}'
+    volumes:
+      - '.:/var/www/html'
+    depends_on:
+      - mariadb
+      - redis
+
   mariadb:
     build: ./docker/mariadb
     container_name: suri_mariadb
@@ -15,7 +32,7 @@ services:
       - ./mariadb/init:/docker-entrypoint-initdb.d
       - mariadb_volume:/var/lib/mysql
     ports:
-      - ${DB_PORT:-3306}:3306
+      - ${DB_PORT:-3308}:3306
 
   redis:
     image: redis:6
