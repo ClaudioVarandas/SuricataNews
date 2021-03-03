@@ -2,12 +2,12 @@ version: "3.6"
 
 services:
   api:
-    container_name: suri_api
     build:
       context: ./docker/php80
       dockerfile: Dockerfile
       args:
         WWWGROUP: '${WWWGROUP}'
+    container_name: suri_api
     ports:
       - '${APP_PORT:-88}:80'
     environment:
