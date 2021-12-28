@@ -10,6 +10,9 @@ use GuzzleHttp\Client as HttpClient;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use League\Csv\Reader;
+use League\Csv\Statement;
 
 class Covid19PortugalCountyUpdate extends Command
 {
@@ -26,49 +29,61 @@ class Covid19PortugalCountyUpdate extends Command
 
     public function handle()
     {
-        $vostBaseURl = config('services.vost_covid19_rest_api.base_url');
-        $uri = sprintf('%s/%s', $vostBaseURl, 'get_last_update_counties');
-        $response = $this->client->get($uri);
-        $data = json_decode($response->getBody(), true);
+        $csv = file_get_contents(config('services.dssg_pt_covid19.full_counties'));
+
+        if (Storage::disk('local_data')->exists('/covid19/data_concelhos_new.csv')) {
+            Storage::disk('local_data')->delete('/covid19/data_concelhos_new.csv');
+        }
+
+        Storage::disk('local_data')->put('/covid19/data_concelhos_new.csv', $csv);
+
+        $stream = Storage::disk('local_data')->readStream('/covid19/data_concelhos_new.csv');
+        $reader = Reader::createFromStream($stream);
+        $reader->setHeaderOffset(0);
+        $records = Statement::create()->process($reader);
 
 
         $updatedCountiesCollection = new Collection();
+        $reportDateFormatted = '';
 
-        $dateUpdate = now()->format('Y-m-d');
-
-        foreach ($data as $item) {
-            $dateUpdate = Carbon::parse($item['data'])->format('Y-m-d');
-            $countyRpt = RptCounty::where('date', $dateUpdate)
-                ->where('name', $item['concelho'])
-                ->where('district', $item['distrito'])
+        foreach ($records as $record) {
+            $recordDateObj = Carbon::parse($record['data']);
+            $reportDateFormatted = $recordDateObj->format('Y-m-d');
+            $countyRecordExists = RptCounty::where('date', $reportDateFormatted)
+                ->where('name', $record['concelho'])
+                ->where('district', $record['distrito'])
                 ->first();
 
-            if ($countyRpt) {
+            if ($countyRecordExists) {
                 continue;
             }
 
             $countyRptModel = RptCounty::create([
-                'date' => $item['data'],
-                'name' => $item['concelho'],
-                'district' => $item['distrito'],
-                'json_raw' => $item
+                'date' => $record['data'],
+                'name' => $record['concelho'],
+                'district' => $record['distrito'],
+                'json_raw' => $record
             ]);
 
             if ($countyRptModel) {
                 $updatedCountiesCollection->push($countyRptModel);
             }
-
         }
 
         $this->info(sprintf("%s new counties reported.", $updatedCountiesCollection->count()));
 
-        $updatedCountiesCollection->sortBy(function ($model) {
-            return $model->name;
-        });
+        if ($updatedCountiesCollection->isEmpty()) {
+            return 0;
+        }
+
+        $updatedCountiesCollection
+            ->sortBy(function ($model) {
+                return $model->name;
+            });
 
         foreach (array_chunk($updatedCountiesCollection->toArray(), 40, true) as $dataChunk) {
             Notification::route('telegram', config('services.telegram-bot-api.chat_id'))
-                ->notify(new Covid19ReportCounty($dateUpdate, $dataChunk));
+                ->notify(new Covid19ReportCounty($reportDateFormatted, $dataChunk));
         }
 
         return 0;

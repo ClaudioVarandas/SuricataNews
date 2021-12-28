@@ -15,50 +15,45 @@ class Covid19PortugalFullUpdateDaily extends Command
 
     public function handle()
     {
-        try {
-            $storedItemsCounter = 0;
+        $storedItemsCounter = 0;
 
-            $csv = file_get_contents('https://raw.githubusercontent.com/dssg-pt/covid19pt-data/master/data.csv');
+        $csv = file_get_contents(config('services.dssg_pt_covid19.full_daily'));
 
-            if(Storage::disk('local_data')->exists('/covid19/data.csv')){
-                Storage::disk('local_data')->delete('/covid19/data.csv');
+        if (Storage::disk('local_data')->exists('/covid19/data.csv')) {
+            Storage::disk('local_data')->delete('/covid19/data.csv');
+        }
+
+        Storage::disk('local_data')->put('/covid19/data.csv', $csv);
+
+        $stream = Storage::disk('local_data')->readStream('/covid19/data.csv');
+        $reader = Reader::createFromStream($stream);
+        $reader->setHeaderOffset(0);
+        $records = Statement::create()->process($reader);
+
+        RptDaily::truncate();
+
+        $bar = $this->output->createProgressBar($records->count());
+        $bar->start();
+
+        foreach ($records as $record) {
+            $daily = new RptDaily();
+            $daily->date = $record['data'];
+            $daily->record_date = $record['data_dados'];
+            $daily->json_raw = $record;
+            $result = $daily->save();
+
+            if ($result) {
+                $storedItemsCounter++;
             }
 
-            Storage::disk('local_data')->put('/covid19/data.csv', $csv);
-
-            $stream = Storage::disk('local_data')->readStream('/covid19/data.csv');
-            $reader = Reader::createFromStream($stream);
-            $reader->setHeaderOffset(0);
-            $records = Statement::create()->process($reader);
-
-            RptDaily::truncate();
-
-            $bar = $this->output->createProgressBar($records->count());
-            $bar->start();
-
-            foreach ($records as $record) {
-                $daily = new RptDaily();
-                $daily->date = $record['data'];
-                $daily->record_date = $record['data_dados'];
-                $daily->json_raw = $record;
-                $result = $daily->save();
-
-                if ($result) {
-                    $storedItemsCounter++;
-                }
-
-                $bar->advance();
-            }
-
-        } catch (Exception $e) {
-            $this->error($e->getMessage() . PHP_EOL);
+            $bar->advance();
         }
 
         $bar->finish();
         $this->newLine();
         $this->info(sprintf("Finish. Stored %s records.", $storedItemsCounter));
 
-        return Command::SUCCESS;
+        return 0;
     }
 
 }

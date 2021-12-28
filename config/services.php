@@ -29,9 +29,9 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-    'vost_covid19_rest_api' => [
-        'base_url' => 'https://covid19-api.vost.pt/Requests'
-    ],
+    //'vost_covid19_rest_api' => [
+    //    'base_url' => 'https://covid19-api.vost.pt/Requests'
+    //],
     'dssg_pt_covid19' => [
         'full_counties' => 'https://raw.githubusercontent.com/dssg-pt/covid19pt-data/master/data_concelhos_new.csv',
         'full_daily' => 'https://raw.githubusercontent.com/dssg-pt/covid19pt-data/master/data.csv'

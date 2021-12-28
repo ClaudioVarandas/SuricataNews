@@ -3,8 +3,12 @@
 namespace App\Console\Commands\Covid19PT;
 
 use App\Models\RptCounty;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
+use League\Csv\Reader;
+use League\Csv\Statement;
 
 class Covid19PortugalFullUpdateCounties extends Command
 {
@@ -21,41 +25,49 @@ class Covid19PortugalFullUpdateCounties extends Command
 
     public function handle()
     {
-        $vostBaseURl = config('services.vost_covid19_rest_api.base_url');
-        $uri = sprintf('%s/%s', $vostBaseURl, 'get_full_dataset_counties');
-        $response = $this->client->get($uri);
-        $fullDataArray = json_decode($response->getBody(), true);
+        $csv = file_get_contents(config('services.dssg_pt_covid19.full_counties'));
+
+        if (Storage::disk('local_data')->exists('/covid19/data_concelhos_new.csv')) {
+            Storage::disk('local_data')->delete('/covid19/data_concelhos_new.csv');
+        }
+
+        Storage::disk('local_data')->put('/covid19/data_concelhos_new.csv', $csv);
+
+        $stream = Storage::disk('local_data')->readStream('/covid19/data_concelhos_new.csv');
+        $reader = Reader::createFromStream($stream);
+        $reader->setHeaderOffset(0);
+        $records = Statement::create()->process($reader);
+
 
         RptCounty::truncate();
 
-        $bar = $this->output->createProgressBar(count($fullDataArray));
+        $bar = $this->output->createProgressBar($records->count());
         $bar->start();
 
         $storedItemsCounter = 0;
-        foreach ($fullDataArray as $item) {
 
-            try {
-                $county = new RptCounty();
-                $county->date = $item['data'];
-                $county->name = $item['concelho'];
-                $county->district = $item['distrito'];
-                $county->json_raw = $item;
-                $result = $county->save();
+        foreach ($records as $record) {
 
-                if ($result) {
-                    $storedItemsCounter++;
-                }
-                $bar->advance();
+            $county = new RptCounty();
+            $county->date = $record['data'];
+            $county->name = $record['concelho'];
+            $county->district = $record['distrito'];
+            $county->json_raw = $record;
+            $result = $county->save();
 
-            } catch (\Throwable $t) {
-                $this->error($t->getMessage() . PHP_EOL);
+            if ($result) {
+                $storedItemsCounter++;
             }
+
+            $bar->advance();
         }
+
         $bar->finish();
         $this->newLine();
         $this->info(sprintf("Finish. Stored %s records.", $storedItemsCounter));
 
-        return Command::SUCCESS;
+        return 0;
+
     }
 
 }

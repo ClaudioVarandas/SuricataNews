@@ -22,7 +22,6 @@ Commands available:
 Notification channels:
 - Telegram notifications
   - Channel SuricataNews https://t.me/SuricataNews
-    
 
 ### Requirements
 
@@ -75,3 +74,9 @@ Covid19 data Portugal (VOSTPT and DSSG):
 
 IPMA:
 - https://api.ipma.pt
+
+### TODO
+
+- Refactor Covid19 commands
+  - move duplicated code into classes
+  - write unit tests
