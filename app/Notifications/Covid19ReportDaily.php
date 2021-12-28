@@ -50,7 +50,7 @@ class Covid19ReportDaily extends Notification
         $text = sprintf("*COVID19 | Data do relatório* (resumo): %s", $data['data']);
         $text .= PHP_EOL;
         $text .= PHP_EOL;
-        $text .= sprintf("- Novos casos confirmados: %s", $data['confirmados_novos']);
+        $text .= sprintf("- Novos casos confirmados: %s (%s)", $data['confirmados_novos'], $data['confirmados_novos_var']);
         $text .= PHP_EOL;
         $text .= sprintf("- Total de casos confirmados: %s", $data['confirmados']);
         $text .= PHP_EOL;
@@ -60,12 +60,7 @@ class Covid19ReportDaily extends Notification
         $text .= PHP_EOL;
         $text .= sprintf("- Total de casos activos: %s", $data['ativos']);
         $text .= PHP_EOL;
-        $text .= sprintf("- Total de óbitos: %s", $data['obitos']);
-
-        if (!empty($data['obitos_balanco_diario'])) {
-            $text .= PHP_EOL;
-            $text .= sprintf("- Óbitos balanço diário: %s", $data['obitos_balanco_diario']);
-        }
+        $text .= sprintf("- Total de óbitos: %s (%s)", $data['obitos'], $data['obitos_var']);
         $text .= PHP_EOL;
 
         return $text;

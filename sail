@@ -13,7 +13,7 @@ if [ $# -gt 0 ]; then
 
     # START
     if [ "$1" == "start" ]; then
-        docker-compose up -d --build
+        docker-compose up -d
     # STOP
     elif [ "$1" == "stop" ]; then
         docker-compose stop

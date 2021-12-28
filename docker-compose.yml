@@ -10,7 +10,7 @@ services:
     container_name: suri_api
     ports:
       - '${APP_PORT:-88}:80'
-      - '${SUPERVISOR_UI_PORT:-88}:9001'
+      - '${SUPERVISOR_UI_PORT:-9001}:9001'
     environment:
       WWWUSER: '${WWWUSER}'
     volumes:
