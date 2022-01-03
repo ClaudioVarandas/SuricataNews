@@ -25,7 +25,8 @@ class GamespotNewsFetcher extends Command
             $lastStoredNewsItem = Cache::get('gamespot_last_news_item_ts');
         }
 
-        $this->info(Carbon::createFromTimestamp($lastStoredNewsItem)->format('Y-m-d H:i:s'));
+        $lastStoredNewsItemDtFormatted = Carbon::createFromTimestamp($lastStoredNewsItem)->format('Y-m-d H:i:s');
+        $this->info("Last message date time : " . $lastStoredNewsItemDtFormatted);
 
         $newsCollection = $newsCollection
             ->filter(function ($item) use ($lastStoredNewsItem) {
@@ -37,13 +38,18 @@ class GamespotNewsFetcher extends Command
             try {
                 Notification::route('discord', config('services.discord.channels_id.news'))
                     ->notify(new GamesOutbreakNews($item));
-                
+
                 Cache::forever('gamespot_last_news_item_ts', $item['published_date_ts']);
+
+                $currentMessageDtFormatted = Carbon::createFromTimestamp($item['published_date_ts'])
+                    ->format('Y-m-d H:i:s');
+                $this->info("Message set : " . $currentMessageDtFormatted);
+
                 usleep(1000000);
 
             } catch (Exception $exception) {
-                $this->error($exception->getMessage());
-                break;
+                $this->error("Message skipped. " . $this->error("Skipped."));
+                continue;
             }
         }
 

@@ -68,8 +68,7 @@ php artisan covid19pt:full-update-counties
 
 #### Data sources
 
-Covid19 data Portugal (VOSTPT and DSSG):
-- https://covid19-api.vost.pt/
+Covid19 data Portugal (DSSG raw data):
 - https://github.com/dssg-pt/covid19pt-data
 
 IPMA:
