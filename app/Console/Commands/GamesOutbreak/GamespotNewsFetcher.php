@@ -21,20 +21,25 @@ class GamespotNewsFetcher extends Command
             $newsCollection = $this->getNewsFromRssFeed();
             $lastStoredNewsItem = now()->startOfDay()->timestamp;
 
-            if(!Cache::has('gamespot_last_news_item_ts')){
+            if (!Cache::has('gamespot_last_news_item_ts')) {
                 Cache::forever('gamespot_last_news_item_ts', $newsCollection->first()['published_date_ts']);
-            }else{
+            } else {
                 $lastStoredNewsItem = Cache::get('gamespot_last_news_item_ts');
             }
 
-            $newsCollection = $newsCollection->filter(function($item) use($lastStoredNewsItem){
-                return $item['published_date_ts'] > $lastStoredNewsItem;
-            });
+            $newsCollection = $newsCollection
+                ->filter(function ($item) use ($lastStoredNewsItem) {
+                    return $item['published_date_ts'] > $lastStoredNewsItem;
+                })
+                ->sortBy('published_date_ts')
+                ->each(function ($item) {
+                    Notification::route('discord', config('services.discord.channels_id.news'))
+                        ->notify(new GamesOutbreakNews($item));
 
-            foreach ($newsCollection->toArray() as $item){
-                Notification::route('discord', config('services.discord.channels_id.news'))
-                    ->notify(new GamesOutbreakNews($item));
-            }
+                    Cache::forever('gamespot_last_news_item_ts', $item['published_date_ts']);
+                    usleep(300000);
+                });
+
 
         } catch (Exception $exception) {
             $this->error($exception->getMessage());
