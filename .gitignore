@@ -4,6 +4,7 @@
 /storage/*.key
 /vendor
 .env
+.env.dev
 .env.backup
 .phpunit.result.cache
 docker-compose.override.yml
@@ -17,3 +18,4 @@ yarn-error.log
 /storage/data/covid19
 supervisord.log
 supervisord.pid
+

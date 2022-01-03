@@ -24,11 +24,16 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Covid19 PT
-        $schedule->command('covid19pt:daily-update')->everyFiveMinutes();
-        $schedule->command('covid19pt:county-update')->everyFiveMinutes();
-        // Weather
-        $schedule->command('weather:ipma:fetch-warnings')->dailyAt('08:30');
+
+        if($this->app->isProduction()){
+            // Covid19 PT
+            $schedule->command('covid19pt:daily-update')->everyFiveMinutes();
+            $schedule->command('covid19pt:county-update')->everyFiveMinutes();
+            // Weather
+            $schedule->command('weather:ipma:fetch-warnings')->dailyAt('08:30');
+            // GAMES OUTBREAK
+            $schedule->command('go:news:gamespot')->everyFifteenMinutes();
+        }
     }
 
     /**
@@ -41,7 +46,8 @@ class Kernel extends ConsoleKernel
         $this->load([
             __DIR__ . '/Commands/Covid19PT',
             //__DIR__.'/Commands/Weather'
-            __DIR__ . '/Commands/Weather/Ipma'
+            __DIR__ . '/Commands/Weather/Ipma',
+            __DIR__ . '/Commands/GamesOutbreak'
         ]);
 
         require base_path('routes/console.php');
