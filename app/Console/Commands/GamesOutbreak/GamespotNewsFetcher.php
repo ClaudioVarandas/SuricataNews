@@ -16,34 +16,35 @@ class GamespotNewsFetcher extends Command
 
     public function handle()
     {
-        try {
+        $newsCollection = $this->getNewsFromRssFeed();
+        $lastStoredNewsItem = now()->startOfDay()->timestamp;
 
-            $newsCollection = $this->getNewsFromRssFeed();
-            $lastStoredNewsItem = now()->startOfDay()->timestamp;
+        if (!Cache::has('gamespot_last_news_item_ts')) {
+            Cache::forever('gamespot_last_news_item_ts', $newsCollection->first()['published_date_ts']);
+        } else {
+            $lastStoredNewsItem = Cache::get('gamespot_last_news_item_ts');
+        }
 
-            if (!Cache::has('gamespot_last_news_item_ts')) {
-                Cache::forever('gamespot_last_news_item_ts', $newsCollection->first()['published_date_ts']);
-            } else {
-                $lastStoredNewsItem = Cache::get('gamespot_last_news_item_ts');
+        $this->info(Carbon::createFromTimestamp($lastStoredNewsItem)->format('Y-m-d H:i:s'));
+
+        $newsCollection = $newsCollection
+            ->filter(function ($item) use ($lastStoredNewsItem) {
+                return $item['published_date_ts'] > $lastStoredNewsItem;
+            })
+            ->sortBy(['published_date_ts','desc']);
+
+        foreach ($newsCollection as $item) {
+            try {
+                Notification::route('discord', config('services.discord.channels_id.news'))
+                    ->notify(new GamesOutbreakNews($item));
+                
+                Cache::forever('gamespot_last_news_item_ts', $item['published_date_ts']);
+                usleep(1000000);
+
+            } catch (Exception $exception) {
+                $this->error($exception->getMessage());
+                break;
             }
-
-            $newsCollection = $newsCollection
-                ->filter(function ($item) use ($lastStoredNewsItem) {
-                    return $item['published_date_ts'] > $lastStoredNewsItem;
-                })
-                ->sortBy('published_date_ts')
-                ->each(function ($item) {
-                    Notification::route('discord', config('services.discord.channels_id.news'))
-                        ->notify(new GamesOutbreakNews($item));
-
-                    Cache::forever('gamespot_last_news_item_ts', $item['published_date_ts']);
-                    usleep(300000);
-                });
-
-
-        } catch (Exception $exception) {
-            $this->error($exception->getMessage());
-            return 1;
         }
 
         return 0;
