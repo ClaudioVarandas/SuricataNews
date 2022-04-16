@@ -27,12 +27,14 @@ class Kernel extends ConsoleKernel
 
         if($this->app->isProduction()){
             // Covid19 PT
-            $schedule->command('covid19pt:daily-update')->everyFiveMinutes();
-            $schedule->command('covid19pt:county-update')->everyFiveMinutes();
+            //$schedule->command('covid19pt:daily-update')->everyFiveMinutes();
+            //$schedule->command('covid19pt:county-update')->everyFiveMinutes();
+
             // Weather
             $schedule->command('weather:ipma:fetch-warnings')->dailyAt('08:30');
+
             // GAMES OUTBREAK
-            $schedule->command('go:news:gamespot')->everyFifteenMinutes();
+            //$schedule->command('go:news:gamespot')->everyFifteenMinutes();
         }
     }
 
